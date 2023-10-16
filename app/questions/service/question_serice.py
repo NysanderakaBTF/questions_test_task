@@ -1,6 +1,7 @@
 from typing import List
 
 import aiohttp
+from fastapi import HTTPException
 from sqlalchemy import select
 
 from app.questions.models.question import Question
@@ -23,10 +24,12 @@ class QuestionService:
         inserted_questions = []
 
         while number_of_questions > 0:
-            print(number_of_questions)
             async with aiohttp.ClientSession() as session:
-                resp = await session.get(f'https://jservice.io/api/random?count={number_of_questions}')
-                resp = await resp.json()
+                try:
+                    resp = await session.get(f'https://jservice.io/api/random?count={number_of_questions}')
+                    resp = await resp.json()
+                except Exception as e:
+                    raise HTTPException(status_code=424, detail="External service error")
 
                 resp1 = list({i['id']: i for i in resp}.values())
                 question_ids = [i['id'] for i in resp1]
@@ -37,7 +40,6 @@ class QuestionService:
 
                     presented_question_ids = presented_questions.scalars().all()
 
-                    print('presented_questions', presented_questions)
                     questions_to_save = [QuestionSchema(id=i['id'],
                                                         answer=i['answer'],
                                                         text=i['question'],
