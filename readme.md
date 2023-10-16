@@ -20,7 +20,7 @@ Run the following command to create and run containers of the app
 After all containers being created and started you can access the application
 on following address: http://loclalhost:8000/docs
 
-### Example
+### Example of request
 
 
 
